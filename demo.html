@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VirtuWear – Try-On Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
+    }
+    body{
+      min-height:100vh;
+      background:radial-gradient(circle at top,#1d4ed8 0,#020617 40%,#000 100%);
+      color:#e5e7eb;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding:20px
+    }
+    main{
+      width:100%;
+      max-width:1200px;
+      background:rgba(15,23,42,.98);
+      border-radius:24px;
+      box-shadow:0 30px 70px rgba(0,0,0,.65);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.25)
+    }
+    header{
+      padding:18px 22px 14px;
+      border-bottom:1px solid rgba(148,163,184,.25);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      background:
+        radial-gradient(circle at 0% 0%,rgba(59,130,246,.28),transparent 55%),
+        radial-gradient(circle at 100% 0%,rgba(236,72,153,.26),transparent 55%),
+        linear-gradient(135deg,#020617,#020617)
+    }
+    h1{
+      font-size:24px;
+      letter-spacing:.04em
+    }
+    .subtitle{
+      font-size:12px;
+      color:#cbd5f5;
+      margin-top:2px
+    }
+    .btn-secondary-link{
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.95);
+      color:#e5e7eb;
+      padding:7px 14px;
+      cursor:pointer;
+      font-size:12px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px
+    }
+    .demo-wrapper{
+      padding:18px 22px 24px;
+      background:radial-gradient(circle at top,rgba(15,23,42,1),#020617)
+    }
+    .demo-header{
+      margin-bottom:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px
+    }
+    .demo-title{
+      font-size:16px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:8px
+    }
+    .demo-title-pill{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:rgba(148,163,184,.18);
+      color:#e5e7eb
+    }
+    .demo-caption{
+      font-size:12px;
+      color:#9ca3af
+    }
+    .app{
+      width:100%;
+      background:rgba(15,23,42,.96);
+      border-radius:20px;
+      border:1px solid rgba(148,163,184,.4);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr)
+    }
+    @media(max-width:900px){
+      .app{grid-template-columns:1fr}
+    }
+    .left,.right{
+      padding:20px
+    }
+    .section-title{
+      font-size:15px;
+      margin-bottom:8px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:6px
+    }
+    .section-title span{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:rgba(56,189,248,.15);
+      color:#7dd3fc
+    }
+    .small-label{
+      font-size:11px;
+      color:#9ca3af
+    }
+    .outfits-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+      gap:10px;
+      max-height:300px;
+      overflow-y:auto;
+      padding-right:4px
+    }
+    .outfit-card{
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      cursor:pointer;
+      border:1px solid rgba(148,163,184,.3);
+      background:#020617;
+      transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease,background .15s ease
+    }
+    .outfit-card:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 25px rgba(0,0,0,.35);
+      border-color:rgba(96,165,250,.7)
+    }
+    .outfit-card.selected{
+      border-color:#38bdf8;
+      box-shadow:0 0 0 1px rgba(56,189,248,.8);
+      background:radial-gradient(circle at top,rgba(56,189,248,.13),#020617)
+    }
+    .outfit-card img{
+      width:100%;
+      display:block;
+      aspect-ratio:3/4;
+      object-fit:cover
+    }
+    .outfit-name{
+      font-size:11px;
+      padding:4px 6px 6px;
+      color:#9ca3af;
+      text-align:center;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden
+    }
+    .upload-area{
+      border-radius:18px;
+      border:1px dashed rgba(148,163,184,.5);
+      padding:16px;
+      text-align:center;
+      background:radial-gradient(circle at top,rgba(59,130,246,.22),#020617);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+      justify-content:center
+    }
+    .upload-area p{
+      font-size:13px;
+      color:#cbd5f5
+    }
+    .upload-area input[type=file]{
+      display:none
+    }
+    .btn-secondary{
+      background:rgba(15,23,42,.8);
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.5);
+      color:#e5e7eb;
+      padding:7px 14px;
+      cursor:pointer;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px
+    }
+    .btn-primary{
+      border:none;
+      border-radius:999px;
+      font-size:14px;
+      padding:9px 20px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:linear-gradient(135deg,#38bdf8,#6366f1);
+      color:#fff;
+      box-shadow:0 18px 35px rgba(37,99,235,.7);
+      transition:transform .1s ease,box-shadow .1s ease,filter .1s ease
+    }
+    .btn-primary:disabled{
+      opacity:.6;
+      cursor:default;
+      box-shadow:none
+    }
+    .btn-primary:hover:not(:disabled){
+      transform:translateY(-1px);
+      filter:brightness(1.05)
+    }
+    .btn-primary:active:not(:disabled){
+      transform:translateY(0);
+      box-shadow:0 8px 20px rgba(37,99,235,.7)
+    }
+    .prompt-input{
+      width:100%;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.5);
+      background:rgba(15,23,42,.9);
+      color:#e5e7eb;
+      padding:8px 10px;
+      font-size:13px;
+      margin-top:6px;
+      outline:none
+    }
+    .prompt-input::placeholder{
+      color:#6b7280
+    }
+    .preview-box{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.5);
+      background:radial-gradient(circle at top,rgba(56,189,248,.12),#020617);
+      min-height:280px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative
+    }
+    #resultImage{
+      max-width:100%;
+      max-height:100%;
+      border-radius:16px;
+      object-fit:contain;
+      display:none
+    }
+    .placeholder{
+      text-align:center;
+      font-size:13px;
+      color:#9ca3af;
+      padding:20px
+    }
+    .status{
+      font-size:12px;
+      color:#9ca3af;
+      margin-top:6px;
+      min-height:16px
+    }
+    .status.error{color:#fecaca}
+    .status.success{color:#bbf7d0}
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+      flex-wrap:wrap;
+      justify-content:space-between
+    }
+    .pagination{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-top:10px;
+      font-size:11px;
+      color:#9ca3af
+    }
+    .pagination-buttons{
+      display:flex;
+      gap:6px;
+      align-items:center
+    }
+    .pagination button{
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.9);
+      color:#e5e7eb;
+      padding:4px 10px;
+      font-size:11px;
+      cursor:pointer
+    }
+    .pagination button:disabled{
+      opacity:.4;
+      cursor:default
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>VirtuWear – Try-On Demo</h1>
+        <div class="subtitle">
+          Upload a photo, choose an outfit, and generate a virtual try-on preview.
+        </div>
+      </div>
+      <a href="index.html" class="btn-secondary-link">← Back to Home</a>
+    </header>
+
+    <section class="demo-wrapper">
+      <div class="demo-header">
+        <div class="demo-title">
+          Live Try-On
+          <span class="demo-title-pill">demo</span>
+        </div>
+        <div class="demo-caption">
+          This page uses the backend endpoints <code>/api/outfits</code> and <code>/api/tryon</code>
+          to load outfits and generate results.
+        </div>
+      </div>
+
+      <div class="app">
+        <!-- LEFT: Outfit gallery -->
+        <div class="left">
+          <div class="section-title">
+            Outfit Library
+            <span>assets/img_out</span>
+          </div>
+          <p class="small-label" style="margin-bottom:10px;">
+            These outfits are loaded from <code>assets/img_out</code>. Click a garment to select it.
+          </p>
+          <div id="outfitsGrid" class="outfits-grid"></div>
+          <div class="pagination">
+            <div class="pagination-info" id="paginationInfo">Page 1 of 1</div>
+            <div class="pagination-buttons">
+              <button id="prevPageBtn">Prev</button>
+              <button id="nextPageBtn">Next</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Upload + result -->
+        <div class="right">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div class="section-title">
+                Your Photo
+                <span>upload</span>
+              </div>
+              <div class="upload-area">
+                <p id="photoLabel">No photo selected.</p>
+                <label class="btn-secondary">
+                  <input id="photoInput" type="file" accept="image/*" />
+                  Choose photo
+                </label>
+                <div class="small-label">
+                  Tip: use a clear, well-lit photo for better results.
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-title">
+                Style prompt
+                <span>optional</span>
+              </div>
+              <input
+                id="promptInput"
+                class="prompt-input"
+                placeholder="e.g. studio lighting, neutral background, soft shadows"
+              />
+            </div>
+
+            <div class="controls">
+              <button id="tryonBtn" class="btn-primary">✨ Generate Try-On</button>
+              <div id="status" class="status"></div>
+            </div>
+
+            <div>
+              <div class="section-title">
+                Result Preview
+                <span>output</span>
+              </div>
+              <div class="preview-box">
+                <img id="resultImage" alt="Try-on result" />
+                <div id="placeholder" class="placeholder">
+                  Your generated try-on result will appear here.<br />
+                  Select an outfit and upload a photo, then click <b>Generate Try-On</b>.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const outfitsGrid = document.getElementById("outfitsGrid");
+    const photoInput = document.getElementById("photoInput");
+    const photoLabel = document.getElementById("photoLabel");
+    const promptInput = document.getElementById("promptInput");
+    const tryonBtn = document.getElementById("tryonBtn");
+    const statusEl = document.getElementById("status");
+    const resultImage = document.getElementById("resultImage");
+    const placeholder = document.getElementById("placeholder");
+    const paginationInfo = document.getElementById("paginationInfo");
+    const prevPageBtn = document.getElementById("prevPageBtn");
+    const nextPageBtn = document.getElementById("nextPageBtn");
+
+    let allOutfits = [];
+    let selectedOutfit = null;
+    let selectedPhotoFile = null;
+    let currentPage = 1;
+    const pageSize = 12;
+
+    async function loadOutfits() {
+      try {
+        const res = await fetch("/api/outfits");
+        const data = await res.json();
+        allOutfits = data.files || [];
+        currentPage = 1;
+        renderOutfitPage();
+      } catch (err) {
+        console.error(err);
+        setStatus("Failed to load outfits. Is the server running?", "error");
+      }
+    }
+
+    function renderOutfitPage() {
+      outfitsGrid.innerHTML = "";
+
+      if (!allOutfits.length) {
+        outfitsGrid.innerHTML =
+          "<div class='small-label'>No outfits found in <code>assets/img_out</code>.</div>";
+        paginationInfo.textContent = "Page 0 of 0";
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        return;
+      }
+
+      const totalPages = Math.ceil(allOutfits.length / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageItems = allOutfits.slice(start, end);
+
+      pageItems.forEach((filename) => {
+        const card = document.createElement("div");
+        card.className = "outfit-card";
+        card.dataset.filename = filename;
+
+        const img = document.createElement("img");
+        img.src = `/assets/img_out/${filename}`;
+        img.alt = filename;
+
+        const name = document.createElement("div");
+        name.className = "outfit-name";
+        name.textContent = filename;
+
+        if (filename === selectedOutfit) {
+          card.classList.add("selected");
+        }
+
+        card.addEventListener("click", () => {
+          document
+            .querySelectorAll(".outfit-card")
+            .forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedOutfit = filename;
+          setStatus(`Selected outfit: ${filename}`, "success");
+        });
+
+        card.appendChild(img);
+        card.appendChild(name);
+        outfitsGrid.appendChild(card);
+      });
+
+      paginationInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+    }
+
+    prevPageBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderOutfitPage();
+      }
+    });
+
+    nextPageBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(allOutfits.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderOutfitPage();
+      }
+    });
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files[0];
+      if (file) {
+        selectedPhotoFile = file;
+        photoLabel.textContent = `Selected: ${file.name}`;
+      } else {
+        selectedPhotoFile = null;
+        photoLabel.textContent = "No photo selected.";
+      }
+    });
+
+    function setStatus(msg, type = "") {
+      statusEl.textContent = msg || "";
+      statusEl.classList.remove("error", "success");
+      if (type) statusEl.classList.add(type);
+    }
+
+    tryonBtn.addEventListener("click", async () => {
+      if (!selectedPhotoFile) {
+        setStatus("Please upload a photo first.", "error");
+        return;
+      }
+      if (!selectedOutfit) {
+        setStatus("Please select an outfit from the library.", "error");
+        return;
+      }
+
+      try {
+        setStatus("Generating try-on… this may take a few seconds.");
+        tryonBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("photo", selectedPhotoFile);
+        formData.append("outfit", selectedOutfit);
+        if (promptInput.value.trim()) {
+          formData.append("prompt", promptInput.value.trim());
+        }
+
+        const res = await fetch("/api/tryon", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          let errText = "";
+          try {
+            const errJson = await res.json();
+            errText = errJson.error || res.statusText;
+          } catch (_) {
+            errText = res.statusText;
+          }
+          throw new Error(errText);
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        resultImage.src = url;
+        resultImage.style.display = "block";
+        placeholder.style.display = "none";
+        setStatus("Try-on completed.", "success");
+      } catch (err) {
+        console.error(err);
+        setStatus("Error: " + err.message, "error");
+      } finally {
+        tryonBtn.disabled = false;
+      }
+    });
+
+    // Init
+    loadOutfits();
+  </script>
+</body>
+</html>
